@@ -1,0 +1,43 @@
+// Fuente de datos: configuración para MySQL
+datasource db {
+  provider = "mysql" // Cambia si usas otro proveedor (PostgreSQL, SQLite, etc.)
+  url      = env("DATABASE_URL") // Variable de entorno para la conexión
+}
+
+generator client {
+  provider = "prisma-client-js" 
+}
+
+model Usuario {
+  id             Int            @id @default(autoincrement()) 
+  nombre         String         
+  email          String         @unique 
+  password       String        
+  universidad    String        
+  createdAt      DateTime       @default(now()) 
+  viajesCreados  Ride[]         @relation("viajesCreados") 
+}
+
+model Ride {
+  id          Int            @id @default(autoincrement()) 
+  origen      String         
+  destino     String         
+  fechaHora   DateTime       
+  precio      Float          
+  createdAt   DateTime       @default(now()) 
+
+  RideHistory RideHistory[]
+
+  Usuario Usuario[] @relation("viajesCreados")
+}
+
+model RideHistory {
+  id         Int       @id @default(autoincrement()) 
+  pasajeroId Int      
+  rideId     Int      
+  ride       Ride      @relation(fields: [rideId], references: [id]) 
+  estado     String    @default("pendiente") 
+  createdAt  DateTime  @default(now()) 
+
+  @@unique([pasajeroId, rideId]) 
+}
